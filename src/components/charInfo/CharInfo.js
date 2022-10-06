@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import MarvelService from "../../services/MarvelService";
@@ -8,85 +8,68 @@ import Skeleton from "../skeleton/Skeleton";
 
 import "./charInfo.scss";
 
-class CharInfo extends Component {
-  state = {
-    char: null,
-    loading: false,
-    error: false,
-  };
+const CharInfo = (props) => {
+  const [char, setChar] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
-  marvelService = new MarvelService();
+  const marvelService = new MarvelService();
 
-  componentDidMount() {
-    this.updateChar();
-  }
+  useEffect(() => {
+    updateChar();
+    console.log("updated char");
+  }, [props.charId]);
 
-  componentDidUpdate(prevProps) {
-    if (this.props.charId !== prevProps.charId) {
-      this.updateChar();
-    }
-  }
-
-  onCharLoaded = (char) => {
-    this.setState({
-      char, 
-      loading: false,
-    });
-  }
-
-  onError = () => {
-    this.setState({
-      loading: false,
-      error: true,
-    });
-  }
-
-  onCharLoading = () => {
-    this.setState({
-      loading: true,
-    });
-  }
-
-  updateChar = () => {
-    const {charId} = this.props;
+  const updateChar = () => {
+    const { charId } = props;
 
     if (!charId) {
       return;
     }
 
-    this.onCharLoading();
+    onCharLoading();
 
-    this.marvelService
-        .getCharacter(charId)
-        .then(this.onCharLoaded)
-        .catch(this.onError);
-  }
+    marvelService.getCharacter(charId).then(onCharLoaded).catch(onError);
+  };
 
-  render() {
-    const {char, loading, error} = this.state;
+  const onCharLoaded = (char) => {
+    setChar(char);
+    setLoading((loading) => false);
+  };
 
-    const skeleton = char || loading || error ? null : <Skeleton />;
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error || !char) ? <View char={char} /> : null;
+  const onError = () => {
+    setLoading((loading) => false);
+    setError((error) => true);
+  };
 
-    return (
-      <div className="char__info">
-        {skeleton}
-        {errorMessage}
-        {spinner}
-        {content}
-      </div>
-    );
-  }
-}
+  const onCharLoading = () => {
+    setLoading((loading) => true);
+  };
 
-const View = ({char}) => {
-  const {name, description, thumbnail, homepage, wiki, comics} = char;
+  const skeleton = char || loading || error ? null : <Skeleton />;
+  const errorMessage = error ? <ErrorMessage /> : null;
+  const spinner = loading ? <Spinner /> : null;
+  const content = !(loading || error || !char) ? <View char={char} /> : null;
 
-  const placeholderImgUrl = 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg';
+  return (
+    <div className="char__info">
+      {skeleton}
+      {errorMessage}
+      {spinner}
+      {content}
+    </div>
+  );
+};
 
-  let imgStyle = {objectFit: thumbnail === placeholderImgUrl ? 'contain' : 'cover'};
+const View = ({ char }) => {
+  const { name, description, thumbnail, homepage, wiki, comics } = char;
+
+  const placeholderImgUrl =
+    "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg";
+
+  let imgStyle = {
+    objectFit: thumbnail === placeholderImgUrl ? "contain" : "cover",
+  };
 
   return (
     <>
@@ -104,22 +87,20 @@ const View = ({char}) => {
           </div>
         </div>
       </div>
-      <div className="char__descr">
-        {description}
-      </div>
+      <div className="char__descr">{description}</div>
       <div className="char__comics">Comics:</div>
       <ul className="char__comics-list">
-        {comics.length > 0 ? null : 'There is no comics with this character'}
-        {
-          comics.map((item, i) => {
-            // eslint-disable-next-line 
-            if (i > 9) return;
+        {comics.length > 0 ? null : "There is no comics with this character"}
+        {comics.map((item, i) => {
+          // eslint-disable-next-line
+          if (i > 9) return;
 
-            return (
-              <li key={i} className="char__comics-item">{item.name}</li>
-            );
-          })
-        }
+          return (
+            <li key={i} className="char__comics-item">
+              {item.name}
+            </li>
+          );
+        })}
       </ul>
     </>
   );
@@ -127,6 +108,6 @@ const View = ({char}) => {
 
 CharInfo.propTypes = {
   charId: PropTypes.number,
-}
+};
 
 export default CharInfo;
