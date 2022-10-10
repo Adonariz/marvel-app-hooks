@@ -1,6 +1,7 @@
 import "./comicsList.scss";
 
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 import useMarvelService from "../../services/MarvelService";
 import ErrorMessage from "../errorMessage/ErrorMessage";
@@ -38,16 +39,16 @@ const ComicsList = (props) => {
   };
 
   const renderItems = (arr) => {
-    const items = arr.map((item) => {
+    const items = arr.map((item, i) => {
       const { id, title, thumbnail, price } = item;
 
       return (
-        <li key={id} className="comics__item">
-          <a href="#">
+        <li key={i} className="comics__item">
+          <Link to={`/comics/${id}`}>
             <img src={thumbnail} alt={thumbnail} className="comics__item-img" />
             <div className="comics__item-name">{title}</div>
             <div className="comics__item-price">{price}</div>
-          </a>
+          </Link>
         </li>
       );
     });
