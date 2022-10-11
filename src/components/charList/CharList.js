@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 import useMarvelService from "../../services/MarvelService";
 
@@ -61,29 +62,34 @@ const CharList = (props) => {
       };
 
       return (
-        <li
-          key={item.id}
-          tabIndex={0}
-          ref={(elem) => (itemRefs.current[i] = elem)}
-          className="char__item"
-          onClick={() => {
-            props.onCharSelect(item.id);
-            focusOnItem(i);
-          }}
-          onKeyDown={(evt) => {
-            if (evt.key === " " || evt.key === "Enter") {
+        <CSSTransition key={item.id} timeout={500} classNames="char__item">
+          <li
+            className="char__item"
+            tabIndex={0}
+            ref={(elem) => (itemRefs.current[i] = elem)}
+            onClick={() => {
               props.onCharSelect(item.id);
               focusOnItem(i);
-            }
-          }}
-        >
-          <img src={thumbnail} alt={name} style={imgStyle} />
-          <div className="char__name">{name}</div>
-        </li>
+            }}
+            onKeyDown={(evt) => {
+              if (evt.key === " " || evt.key === "Enter") {
+                props.onCharSelect(item.id);
+                focusOnItem(i);
+              }
+            }}
+          >
+            <img src={thumbnail} alt={name} style={imgStyle} />
+            <div className="char__name">{name}</div>
+          </li>
+        </CSSTransition>
       );
     });
 
-    return <ul className="char__grid">{items}</ul>;
+    return (
+      <ul className="char__grid">
+        <TransitionGroup component={null}>{items}</TransitionGroup>
+      </ul>
+    );
   };
 
   const items = renderItems(charList);
